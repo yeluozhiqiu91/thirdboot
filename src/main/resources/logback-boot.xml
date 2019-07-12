@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="GBK" ?>
+<configuration>
+    <!-- 定义日志文件 输入位置 -->
+    <property name="log_dir" value="/u01/logs/first_boot" />
+    <appender name="consoleLog" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+            </pattern>
+        </layout>
+    </appender>
+
+    <!--按文件生成info日志-->
+    <appender name="fileInfoLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--过滤error级别日志 LevelFilter等级过滤器，过滤掉等于临界值的日志-->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <!--日志级别等于error则拒绝写入，不等于error则写入-->
+            <onMatch>DENY</onMatch>
+            <onMismatch>ACCEPT</onMismatch>
+        </filter>
+        <encoder>
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n
+            </pattern>
+        </encoder>
+        <!--每天生成日志-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志保存路径-->
+            <fileNamePattern>${log_dir}/info.%d.log</fileNamePattern>
+        </rollingPolicy>
+    </appender>
+    <!--按文件生成error日志-->
+    <appender name="fileErrLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--过滤error级别日志 ThresholdFilter临界值过滤器，过滤掉小于临界值的日志,只取等于日志级别的日志-->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+        <encoder>
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n
+            </pattern>
+        </encoder>
+        <!--每天生成日志-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志保存路径-->
+            <fileNamePattern>${log_dir}/error.%d.log</fileNamePattern>
+        </rollingPolicy>
+    </appender>
+    <logger name="org.apache.http" level="DEBUG"/>
+    <logger name="org.springframework.web" level="DEBUG"/>
+
+    <root level="${logger.level}">
+        <appender-ref ref="consoleLog"/>
+        <appender-ref ref="fileInfoLog"/>
+        <appender-ref ref="fileErrLog"/>
+    </root>
+</configuration>
